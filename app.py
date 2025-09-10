@@ -1,18 +1,20 @@
 from fastapi import FastAPI, Request
-from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
-# Add this to allow Hoppscotch (and other clients) to access your API
+# ✅ Define app first
+app = FastAPI()
+
+# ✅ Add CORS middleware AFTER app is defined
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # You can restrict later if needed
+    allow_origins=["*"],  # Allow all origins (you can restrict later)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app = FastAPI()
-
+# ✅ Define your input model
 class RentalRequest(BaseModel):
     rental_income: float
     expenses: float
@@ -25,12 +27,14 @@ class RentalRequest(BaseModel):
     filing_status: str
     active_participation: bool = True
 
+# ✅ Define your route
 @app.post("/rental_analysis")
 def rental_analysis(data: RentalRequest):
     annual_depreciation = (data.purchase_price - data.land_value) / 27.5 if data.purchase_price and data.land_value else 0
     cash_flow = data.rental_income - data.expenses
     taxable_income = cash_flow - annual_depreciation
     passive_loss_warning = ""
+
     if not data.active_participation and taxable_income < 0:
         passive_loss_warning = "Passive losses may be disallowed due to lack of active participation."
 
@@ -40,3 +44,4 @@ def rental_analysis(data: RentalRequest):
         "annual_depreciation": annual_depreciation,
         "passive_loss_warning": passive_loss_warning
     }
+

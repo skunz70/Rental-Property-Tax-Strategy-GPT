@@ -1,5 +1,15 @@
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+
+# Add this to allow Hoppscotch (and other clients) to access your API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # You can restrict later if needed
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app = FastAPI()
 
